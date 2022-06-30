@@ -1,0 +1,59 @@
+<template>
+    <v-menu v-model="visiable" transition="scroll-y-transition">
+        <template v-slot:activator="{ on, attrs }">
+            <v-btn ref="toggle" icon v-bind="attrs" v-on="on">
+                <v-icon>mdi-link-variant-plus</v-icon>
+            </v-btn>
+        </template>
+        <v-card @click.stop min-width="320">
+            <v-form @submit.prevent="getMedias" class="px-2 pt-2">
+                <v-progress-linear
+                    indeterminate
+                    color="green darken-1"
+                    class="mb-2"
+                    v-if="loading"
+                ></v-progress-linear>
+                <v-text-field
+                    v-model="url"
+                    label="URL"
+                    placeholder="VD: https://kiddihub.com"
+                    :error-message="error.message"
+                    :error="error.status"
+                    outlined
+                    dense
+                    :disabled="loading"
+                    append-icon="mdi-link"
+                ></v-text-field>
+            </v-form>
+        </v-card>
+    </v-menu>
+</template>
+<script>
+import { fromLink } from "../../../../Services/Media.js";
+export default {
+    data () {
+        return {
+            error: { status: false, message: 'Vui lòng kiểm tra lại đường dẫn' },
+            loading: false,
+            visiable: false,
+            url: ''
+        }
+    },
+    methods: {
+        async getMedias() {
+            this.loading = true;
+            try {
+                const media = await fromLink(this.url);
+                this.$emit('input', [media]);
+                this.error.status = false;
+                this.visiable = false;
+                this.url = '';
+            } catch (error) {
+                this.error.status = true
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
+</script>
